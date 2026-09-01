@@ -556,7 +556,10 @@ for slot, icon in pairs(slots) do
         icon.enchantText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
         icon.enchantText:SetTextColor(1.0, 0.82, 0.0, 1)
         icon.enchantText:SetJustifyH("CENTER")
-        icon.enchantText:SetWidth(150)
+        -- Sin ancho fijo: con SetWidth el FontString corta la linea sola y
+        -- un encantamiento largo aparecia partido en dos, como si fueran dos.
+        -- Auto-ancho: cada linea se dibuja entera y el CENTER la alinea igual.
+        icon.enchantText:SetWidth(0)
         icon.enchantText:SetPoint("BOTTOM", icon, "TOP", 0, 2)
     end
 
@@ -565,7 +568,7 @@ for slot, icon in pairs(slots) do
         icon.poisonText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
         icon.poisonText:SetTextColor(0.0, 1.0, 0.27, 1)  -- green
         icon.poisonText:SetJustifyH("CENTER")
-        icon.poisonText:SetWidth(150)
+        icon.poisonText:SetWidth(0)
         icon.poisonText:SetPoint("BOTTOM", icon.enchantText, "TOP", 0, 2)
         icon.poisonText:Hide()
     end
@@ -575,7 +578,9 @@ for slot, icon in pairs(slots) do
         icon.gemText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
         icon.gemText:SetTextColor(1.0, 1.0, 1.0, 1)
         icon.gemText:SetJustifyH("CENTER")
-        icon.gemText:SetWidth(150)
+        -- Idem: una gema como "+10 penetracion de armadura y +15 aguante" no
+        -- entraba en 150 px y se leia como dos gemas distintas.
+        icon.gemText:SetWidth(0)
         icon.gemText:SetPoint("BOTTOM", icon.poisonText, "TOP", 0, 2)
         icon.gemText:Hide()
     end
@@ -586,7 +591,7 @@ for slot, icon in pairs(slots) do
         icon.horizontalText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
         icon.horizontalText:SetTextColor(1, 1, 1, 1)
         icon.horizontalText:SetJustifyH("LEFT")
-        icon.horizontalText:SetWidth(200)
+        icon.horizontalText:SetWidth(0)
         icon.horizontalText:SetPoint("LEFT", icon, "RIGHT", 5, 0)
         icon.horizontalText:Hide()
     end
