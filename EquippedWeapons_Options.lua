@@ -33,7 +33,7 @@ local function Checkbox(name, parent, x, y, label, fn)
 end
 
 local function SetSliderLbl(sl, labelKey, val)
-    _G[sl:GetName() .. "Text"]:SetText(C_GREEN .. L[labelKey] .. ": " .. C_GOLD .. val .. C_RESET)
+    _G[sl:GetName() .. "Text"]:SetText(C_HDR .. L[labelKey] .. ": " .. C_GOLD .. val .. C_RESET)
 end
 
 local function Slider(name, parent, x, y, labelKey, initVal, minV, maxV, step, w, fn)

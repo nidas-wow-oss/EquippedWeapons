@@ -449,17 +449,33 @@ local timerFrame = CreateFrame("Frame")
 local pendingTimers = {}   -- [key] = { remaining, callback }
 
 timerFrame:SetScript("OnUpdate", function(self, elapsed)
-    local any = false
+    -- OJO: los callbacks NO se pueden ejecutar dentro del pairs(). Varios de
+    -- ellos vuelven a llamar a RunAfterDelay, que AGREGA una clave nueva a
+    -- pendingTimers; borrar la clave actual durante un pairs() es legal en
+    -- Lua, pero agregar una nueva rompe el iterador con
+    -- "invalid key to 'next'". Por eso juntamos los vencidos y los
+    -- disparamos despues de terminar de recorrer.
+    local fired
     for key, t in pairs(pendingTimers) do
         t.remaining = t.remaining - elapsed
         if t.remaining <= 0 then
             pendingTimers[key] = nil
-            t.callback()
-        else
-            any = true
+            fired = fired or {}
+            fired[#fired + 1] = t.callback
         end
     end
-    if not any then self:Hide() end
+
+    if fired then
+        for i = 1, #fired do
+            -- pcall: si un callback falla no debe frenar a los demas ni
+            -- dejar el timer colgado.
+            pcall(fired[i])
+        end
+    end
+
+    -- Los callbacks pueden haber agendado timers nuevos: solo apagamos el
+    -- OnUpdate si de verdad no queda ninguno pendiente.
+    if not next(pendingTimers) then self:Hide() end
 end)
 timerFrame:Hide()
 

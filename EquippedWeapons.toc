@@ -1,4 +1,4 @@
-## Title: EquippedWeapons
+## Title: |cffffffffE|r|cffffffffq|r|cffffffffu|r|cffffffffi|r|cffffffffp|r|cffffffffp|r|cffffffffe|r|cffffffffd|r|cff00ff00W|r|cff00ff00e|r|cff00ff00a|r|cff00ff00p|r|cff00ff00o|r|cff00ff00n|r|cff00ff00s|r
 ## Notes: Shows equipped weapon icons with enchants/gems (dynamic detection)
 ## Author: Nidhaus
 ## Version: 2.0
