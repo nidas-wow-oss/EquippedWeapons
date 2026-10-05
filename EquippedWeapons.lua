@@ -215,6 +215,7 @@ local NAMED_ENCHANTS = {
     ["Blood Draining"]          = "BD",
     ["Icy Weapon"]              = "ICY",
     ["Titanium Weapon Chain"]   = "Chain",
+    ["Titanium Plating"]        = "TTP",
     ["Blade Ward"]              = "BW",
     ["Lifeward"]                = "LW",
     -- ES
@@ -337,6 +338,17 @@ local function AbbreviateText(text, abbrev)
     if not abbrev then return text end
     -- Named enchant?
     if NAMED_ENCHANTS[text] then return NAMED_ENCHANTS[text] end
+    -- Titanium Plating (escudo) = "TTP". Se reconoce por palabras porque el
+    -- nombre cambia con el idioma del cliente ("... de titanio" en espanol)
+    -- y puede venir con otro texto pegado. La cadena de arma de titanio
+    -- ("Chain") ya salio arriba, por nombre exacto.
+    local low = text:lower()
+    if low:find("titanium plating", 1, true)
+        or (low:find("titanio", 1, true) and not low:find("cadena", 1, true)
+            and (low:find("blind", 1, true) or low:find("chap", 1, true)
+                 or low:find("plac", 1, true) or low:find("revest", 1, true))) then
+        return "TTP"
+    end
     -- Pattern match?
     local abbrText = MatchStatLine(text)
     if abbrText then return abbrText end
