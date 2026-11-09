@@ -23,16 +23,16 @@ ns.Lfr = {
     ["Frame locked."]               = "Fenêtre verrouillée.",
     ["Frame unlocked. (Shift+Alt+click to move)"] = "Fenêtre déverrouillée (Shift+Alt+Clic pour déplacer).",
     ["Configure how EquippedWeapons displays weapon icons, enchants, and gems."] = "Configurer comment EquippedWeapons affiche les icônes, enchantements et gemmes.",
-    -- Layout & Text
+
     ["Show text horizontally"]      = "Afficher le texte horizontalement",
     ["Vertical icon layout"]        = "Disposition verticale des icônes",
     ["Grow upwards"]                = "Développer vers le haut",
     ["Abbreviate text (short mode)"] = "Abréger le texte (mode court)",
-    -- Weapon slots
+
     ["Main Hand"]                   = "Main principale",
     ["Off Hand"]                    = "Main secondaire",
     ["Ranged / Relic"]              = "Distance / Relique",
-    -- Profile & Text size
+
     ["Per-character settings"]      = "Paramètres par personnage",
     ["Hide slot labels"]            = "Masquer les étiquettes d'emplacement",
     ["Show full poison name"]       = "Afficher le nom complet du poison",

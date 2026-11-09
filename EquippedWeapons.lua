@@ -1,9 +1,5 @@
--- EquippedWeapons.lua  v2.0
--- Dynamic gem/enchant detection via tooltip scanning + item link parsing.
--- No hardcoded data file required.
-
 local _, ns = ...
--- Fallback: if localization files are missing, L[key] returns the key itself
+
 if not ns.L then
     ns.L = setmetatable({}, { __index = function(_, k) return k end })
 end
@@ -16,9 +12,6 @@ local config = {
     borderPadding = 15,
 }
 
--- ============================================================
--- SavedVariables defaults (overwritten at ADDON_LOADED)
--- ============================================================
 local DB_DEFAULTS = {
     showClassBorders = false,
     point       = "BOTTOMRIGHT",
@@ -43,33 +36,26 @@ local DB_DEFAULTS = {
     showPoisonIcon = false,
 }
 
--- Active profile pointer (starts as defaults, swapped at ADDON_LOADED)
 ns.db = DB_DEFAULTS
 ns.DB_DEFAULTS = DB_DEFAULTS
 
--- Silent helper (no chat prints except initial load)
 local function EWPrint(msg)
-    -- chat prints disabled
+
 end
 
--- ============================================================
--- Profile system: global vs per-character
--- ============================================================
 function ns.InitProfiles()
-    -- Ensure both saved tables exist
+
     if not EquippedWeaponsDB then EquippedWeaponsDB = {} end
     if not EquippedWeaponsCharDB then EquippedWeaponsCharDB = {} end
 
-    -- Merge defaults into global DB
     for k, v in pairs(DB_DEFAULTS) do
         if EquippedWeaponsDB[k] == nil then
             EquippedWeaponsDB[k] = v
         end
     end
 
-    -- Check if this character uses its own profile
     if EquippedWeaponsCharDB.useCharProfile then
-        -- Merge defaults into char DB
+
         for k, v in pairs(DB_DEFAULTS) do
             if EquippedWeaponsCharDB[k] == nil then
                 EquippedWeaponsCharDB[k] = v
@@ -83,7 +69,7 @@ end
 
 function ns.SetCharProfile(enable)
     if enable then
-        -- Copy current global settings to char DB as starting point
+
         for k, v in pairs(EquippedWeaponsDB) do
             if EquippedWeaponsCharDB[k] == nil then
                 EquippedWeaponsCharDB[k] = v
@@ -101,30 +87,22 @@ function ns.IsCharProfile()
     return EquippedWeaponsCharDB and EquippedWeaponsCharDB.useCharProfile or false
 end
 
--- ============================================================
--- Dynamic stat pattern matching  (EN + ES)
--- ============================================================
--- Ordered so that longer / more-specific patterns are tried first.
 local STAT_PATTERNS = {
-    -- combined multi-stat (Accuracy, etc.)
+
     { pat = "%+(%d+) Hit Rating and %+(%d+) Critical Strike Rating", fmt2 = "%s Hit %s Crit" },
     { pat = "%+(%d+) índice de golpe y %+(%d+) índice de golpe crítico", fmt2 = "%s Hit %s Crit" },
 
-    -- Spell Power
     { pat = "%+?(%d+) Spell Power",             fmt = "%s SP" },
     { pat = "%+?(%d+) poder con hechizos",      fmt = "%s SP" },
 
-    -- Attack Power
     { pat = "%+?(%d+) Attack Power",             fmt = "%s AP" },
     { pat = "%+?(%d+) poder de ataque",          fmt = "%s AP" },
 
-    -- Resilience
     { pat = "(%d+) Resilience Rating",           fmt = "%s Res" },
     { pat = "(%d+) Resilience",                  fmt = "%s Res" },
     { pat = "(%d+) índice de temple",            fmt = "%s Res" },
     { pat = "(%d+) temple",                      fmt = "%s Res" },
 
-    -- Crit
     { pat = "(%d+) Critical Strike Rating",      fmt = "%s Crit" },
     { pat = "(%d+) Critical Strike",             fmt = "%s Crit" },
     { pat = "(%d+) Ranged Critical Strike",      fmt = "%s Crit" },
@@ -132,60 +110,46 @@ local STAT_PATTERNS = {
     { pat = "(%d+) índice de golpe crítico",     fmt = "%s Crit" },
     { pat = "(%d+) golpe crítico",               fmt = "%s Crit" },
 
-    -- Hit
     { pat = "(%d+) Hit Rating",                  fmt = "%s Hit" },
     { pat = "(%d+) índice de golpe%s*$",      fmt = "%s Hit" },
 
-    -- Haste
     { pat = "(%d+) Haste Rating",                fmt = "%s Haste" },
     { pat = "(%d+) Haste",                       fmt = "%s Haste" },
     { pat = "(%d+) índice de celeridad",         fmt = "%s Haste" },
     { pat = "(%d+) celeridad",                   fmt = "%s Haste" },
 
-    -- Armor Penetration
     { pat = "(%d+) Armor Penetration Rating",    fmt = "%s ArPen" },
     { pat = "(%d+) Armor Penetration",           fmt = "%s ArPen" },
     { pat = "(%d+) penetración de armadura",     fmt = "%s ArPen" },
 
-    -- Strength
     { pat = "%+?(%d+) Strength",                 fmt = "%s Str" },
     { pat = "%+?(%d+) fuerza",                   fmt = "%s Str" },
 
-    -- Agility
     { pat = "%+?(%d+) Agility",                  fmt = "%s Agy" },
     { pat = "%+?(%d+) agilidad",                 fmt = "%s Agy" },
 
-    -- Stamina
     { pat = "%+?(%d+) Stamina",                  fmt = "%s Sta" },
     { pat = "%+?(%d+) aguante",                  fmt = "%s Sta" },
 
-    -- Intellect
     { pat = "%+?(%d+) Intellect",                fmt = "%s Int" },
     { pat = "%+?(%d+) intelecto",                fmt = "%s Int" },
 
-    -- Spirit
     { pat = "%+?(%d+) Spirit",                   fmt = "%s Spi" },
     { pat = "%+?(%d+) espíritu",                 fmt = "%s Spi" },
 
-    -- Spell Penetration
     { pat = "(%d+) Spell Penetration",           fmt = "%s SPen" },
     { pat = "(%d+) penetración de hechizos",     fmt = "%s SPen" },
 
-    -- Defense
     { pat = "(%d+) Defense Rating",              fmt = "%s Def" },
     { pat = "(%d+) índice de defensa",           fmt = "%s Def" },
 
-    -- Mana per 5
     { pat = "(%d+) [Mm]ana .-%f[%d]5",          fmt = "%s Mp5" },
     { pat = "(%d+) maná .-%f[%d]5",             fmt = "%s Mp5" },
 
-    -- Fishing
     { pat = "%+?(%d+) Fishing",                  fmt = "%s Fish" },
     { pat = "%+?(%d+) pesca",                    fmt = "%s Fish" },
 }
 
---- Try to match a tooltip line to a stat abbreviation.
---- Returns an abbreviated string like "63 SP" or "25 Hit 25 Crit", or nil.
 local function MatchStatLine(text)
     if not text then return nil end
     for _, entry in ipairs(STAT_PATTERNS) do
@@ -204,9 +168,8 @@ local function MatchStatLine(text)
     return nil
 end
 
--- Small table ONLY for proc-based / named enchants that have no numeric stat.
 local NAMED_ENCHANTS = {
-    -- EN
+
     ["Berserking"]              = "BERS",
     ["Mongoose"]                = "MON",
     ["Black Magic"]             = "BL MA",
@@ -218,7 +181,7 @@ local NAMED_ENCHANTS = {
     ["Titanium Plating"]        = "TTP",
     ["Blade Ward"]              = "BW",
     ["Lifeward"]                = "LW",
-    -- ES
+
     ["Rabiar"]                  = "BERS",
     ["Mangosta"]                = "MON",
     ["Magia negra"]             = "BL MA",
@@ -227,11 +190,8 @@ local NAMED_ENCHANTS = {
     ["Cadena de titanio"]       = "Chain",
 }
 
--- ============================================================
--- Poison detection (Rogue)
--- ============================================================
 local POISON_DATA = {
-    -- pat=tooltip pattern, sEN/fEN=short/full EN, sES/fES=short/full ES, icon=item texture ID
+
     { pat = "Deadly Poison",        sEN = "DP",  fEN = "Deadly Poison",       sES = "VM",  fES = "Veneno Mortal",      icon = "Interface\\Icons\\ability_rogue_deadlypoison"    },
     { pat = "Instant Poison",       sEN = "IP",  fEN = "Instant Poison",      sES = "VI",  fES = "Veneno Instantaneo", icon = "Interface\\Icons\\ability_rogue_instantpoison"   },
     { pat = "Wound Poison",         sEN = "WP",  fEN = "Wound Poison",        sES = "VH",  fES = "Veneno de Herida",   icon = "Interface\\Icons\\ability_rogue_woundpoison"     },
@@ -239,7 +199,7 @@ local POISON_DATA = {
     { pat = "Mind%-Numbing Poison", sEN = "MNP", fEN = "Mind-Numbing Poison", sES = "VE",  fES = "Veneno Entumecedor", icon = "Interface\\Icons\\ability_rogue_mindnumbing"      },
     { pat = "Mind Numbing Poison",  sEN = "MNP", fEN = "Mind-Numbing Poison", sES = "VE",  fES = "Veneno Entumecedor", icon = "Interface\\Icons\\ability_rogue_mindnumbing"      },
     { pat = "Anesthetic Poison",    sEN = "ANP", fEN = "Anesthetic Poison",   sES = "VA",  fES = "Veneno Anestesico",  icon = "Interface\\Icons\\ability_rogue_anestheticpoison" },
-    -- ES patterns
+
     { pat = "Veneno Mortal",        sEN = "DP",  fEN = "Deadly Poison",       sES = "VM",  fES = "Veneno Mortal",      icon = "Interface\\Icons\\ability_rogue_deadlypoison"    },
     { pat = "Veneno Instant",       sEN = "IP",  fEN = "Instant Poison",      sES = "VI",  fES = "Veneno Instantaneo", icon = "Interface\\Icons\\ability_rogue_instantpoison"   },
     { pat = "Veneno de Herida",     sEN = "WP",  fEN = "Wound Poison",        sES = "VH",  fES = "Veneno de Herida",   icon = "Interface\\Icons\\ability_rogue_woundpoison"     },
@@ -248,7 +208,6 @@ local POISON_DATA = {
     { pat = "Veneno Anest",         sEN = "ANP", fEN = "Anesthetic Poison",   sES = "VA",  fES = "Veneno Anestesico",  icon = "Interface\\Icons\\ability_rogue_anestheticpoison" },
 }
 
--- Find poison icon by scanning player bags for matching poison item
 local function GetPoisonIconFromBags(poisonPat)
     if not poisonPat then return nil end
     for bag = 0, 4 do
@@ -259,7 +218,7 @@ local function GetPoisonIconFromBags(poisonPat)
                 if link then
                     local itemName = GetItemInfo(link)
                     if itemName then
-                        -- Check if item name matches poison pattern
+
                         for _, p in ipairs(POISON_DATA) do
                             if p.pat == poisonPat and itemName:find(p.pat:gsub("%%%-", "-")) then
                                 local itemID = tonumber(link:match("item:(%d+):"))
@@ -276,7 +235,6 @@ local function GetPoisonIconFromBags(poisonPat)
     return nil
 end
 
--- Returns poison pattern for a tooltip line (used to find bag icon)
 local function GetPoisonPatternFromText(text)
     if not text then return nil end
     for _, p in ipairs(POISON_DATA) do
@@ -304,13 +262,9 @@ local function GetPoisonDisplay(text)
     return nil
 end
 
--- ============================================================
--- Hidden scan tooltip (reuse original name that worked in v1.2)
--- ============================================================
 local scanTip = CreateFrame("GameTooltip", "TempEnchantTooltip", nil, "GameTooltipTemplate")
 scanTip:SetOwner(UIParent, "ANCHOR_NONE")
 
--- GREEN lines that are NOT enchants
 local SKIP_GREENS = {
     "Heroic", "Heroico",
     "Equip:", "Equipar:",
@@ -331,17 +285,11 @@ local function IsSkippableLine(text)
     return false
 end
 
--- ============================================================
--- Abbreviate a stat line or return raw text
--- ============================================================
 local function AbbreviateText(text, abbrev)
     if not abbrev then return text end
-    -- Named enchant?
+
     if NAMED_ENCHANTS[text] then return NAMED_ENCHANTS[text] end
-    -- Titanium Plating (escudo) = "TTP". Se reconoce por palabras porque el
-    -- nombre cambia con el idioma del cliente ("... de titanio" en espanol)
-    -- y puede venir con otro texto pegado. La cadena de arma de titanio
-    -- ("Chain") ya salio arriba, por nombre exacto.
+
     local low = text:lower()
     if low:find("titanium plating", 1, true)
         or (low:find("titanio", 1, true) and not low:find("cadena", 1, true)
@@ -349,24 +297,14 @@ local function AbbreviateText(text, abbrev)
                  or low:find("plac", 1, true) or low:find("revest", 1, true))) then
         return "TTP"
     end
-    -- Pattern match?
+
     local abbrText = MatchStatLine(text)
     if abbrText then return abbrText end
-    -- Truncate
+
     if #text > 14 then return text:sub(1, 12) .. ".." end
     return text
 end
 
--- ============================================================
--- Single-pass scan: returns enchantText, gemText
---
--- Strategy: scan all tooltip lines sequentially.
---   - Enchant = first GREEN line that isn't in SKIP_GREENS
---   - Gems = lines that start with "+" and appear AFTER the enchant
---            line, stopping at "Socket Bonus:" or "Durability" or
---            any non-"+" line.
--- This avoids relying on color for gems entirely.
--- ============================================================
 local function ScanSlotTooltip(slot)
     scanTip:SetOwner(UIParent, "ANCHOR_NONE")
     scanTip:ClearLines()
@@ -378,15 +316,13 @@ local function ScanSlotTooltip(slot)
     local enchantLineFound = false
     local collectingGems = false
 
-    -- Strip WoW texture/color escape sequences: |T...|t |c........|r
     local function StripEscapes(str)
-        str = str:gsub("|T.-|t", "")    -- texture escapes (gem icons)
-        str = str:gsub("|c%x%x%x%x%x%x%x%x", "")  -- color codes
-        str = str:gsub("|r", "")         -- color reset
-        return str:match("^%s*(.-)%s*$") -- trim spaces
+        str = str:gsub("|T.-|t", "")
+        str = str:gsub("|c%x%x%x%x%x%x%x%x", "")
+        str = str:gsub("|r", "")
+        return str:match("^%s*(.-)%s*$")
     end
 
-    -- Check if cleaned text is a gem stat line (starts with "+digit")
     local function IsGemLine(rawText)
         local clean = StripEscapes(rawText)
         return clean:match("^%+%d+") ~= nil
@@ -395,7 +331,6 @@ local function ScanSlotTooltip(slot)
     local numLines = scanTip:NumLines()
     local poisonResult = nil
 
-    -- Pass 1: find enchant (skip poison lines) + find poison
     for i = 2, numLines do
         local fs = _G["TempEnchantTooltipTextLeft" .. i]
         if not fs then break end
@@ -414,8 +349,6 @@ local function ScanSlotTooltip(slot)
         end
     end
 
-    -- Pass 2: collect gems — must be gold/orange colored AND start with +digit
-    -- White stat lines (+99 Stamina) are excluded by color check
     for i = 2, numLines do
         local fs = _G["TempEnchantTooltipTextLeft" .. i]
         if not fs then break end
@@ -425,7 +358,7 @@ local function ScanSlotTooltip(slot)
         if text:match("^Set:") or text:match("^Conjunto:") then break end
         if IsGemLine(text) then
             local gr, gg, gb = fs:GetTextColor()
-            -- Gold/orange gem color: r>0.75, g 0.55-0.90, b<0.25
+
             local isGemColor = (gr > 0.75 and gg > 0.55 and gg < 0.90 and gb < 0.25)
             if isGemColor then
                 local clean = StripEscapes(text)
@@ -438,7 +371,7 @@ local function ScanSlotTooltip(slot)
     if #gemParts > 0 then
         gemResult = table.concat(gemParts, "\n")
     end
-    -- Find which poison pattern was detected (for bag icon lookup)
+
     local poisonPat = nil
     for i = 2, numLines do
         local fs = _G["TempEnchantTooltipTextLeft" .. i]
@@ -454,19 +387,11 @@ local function ScanSlotTooltip(slot)
     return enchantResult, gemResult, poisonResult, poisonPat
 end
 
--- ============================================================
--- Utility: reusable timer pool (no frame leaks)
--- ============================================================
 local timerFrame = CreateFrame("Frame")
-local pendingTimers = {}   -- [key] = { remaining, callback }
+local pendingTimers = {}
 
 timerFrame:SetScript("OnUpdate", function(self, elapsed)
-    -- OJO: los callbacks NO se pueden ejecutar dentro del pairs(). Varios de
-    -- ellos vuelven a llamar a RunAfterDelay, que AGREGA una clave nueva a
-    -- pendingTimers; borrar la clave actual durante un pairs() es legal en
-    -- Lua, pero agregar una nueva rompe el iterador con
-    -- "invalid key to 'next'". Por eso juntamos los vencidos y los
-    -- disparamos despues de terminar de recorrer.
+
     local fired
     for key, t in pairs(pendingTimers) do
         t.remaining = t.remaining - elapsed
@@ -479,30 +404,20 @@ timerFrame:SetScript("OnUpdate", function(self, elapsed)
 
     if fired then
         for i = 1, #fired do
-            -- pcall: si un callback falla no debe frenar a los demas ni
-            -- dejar el timer colgado.
+
             pcall(fired[i])
         end
     end
 
-    -- Los callbacks pueden haber agendado timers nuevos: solo apagamos el
-    -- OnUpdate si de verdad no queda ninguno pendiente.
     if not next(pendingTimers) then self:Hide() end
 end)
 timerFrame:Hide()
 
---- Schedule a callback with debounce: same key cancels previous timer.
--- @param key    string identifier (reuse = debounce)
--- @param delay  seconds
--- @param func   callback
 local function RunAfterDelay(key, delay, func)
     pendingTimers[key] = { remaining = delay, callback = func }
     timerFrame:Show()
 end
 
--- ============================================================
--- Main frame
--- ============================================================
 local frame = EquippedWeaponsFrame
 if not frame then
     frame = CreateFrame("Frame", "EquippedWeaponsFrame", UIParent)
@@ -532,9 +447,6 @@ local function SetLocked(state)
     frame:EnableMouse(not state)
 end
 
--- ============================================================
--- Slot icons
--- ============================================================
 if not MainHandIcon  then MainHandIcon  = CreateFrame("Frame", "MainHandIcon",  frame) end
 if not OffHandIcon   then OffHandIcon   = CreateFrame("Frame", "OffHandIcon",   frame) end
 if not RangedIcon    then RangedIcon    = CreateFrame("Frame", "RangedIcon",    frame) end
@@ -562,15 +474,12 @@ for slot, icon in pairs(slots) do
 
     icon.qualityBorder = icon.qualityBorder or CreateQualityBorder(icon)
 
-    -- Vertical layout stacking (bottom to top): icon -> enchantText -> poisonText -> gemText
     if not icon.enchantText then
         icon.enchantText = icon:CreateFontString(nil, "OVERLAY")
         icon.enchantText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
         icon.enchantText:SetTextColor(1.0, 0.82, 0.0, 1)
         icon.enchantText:SetJustifyH("CENTER")
-        -- Sin ancho fijo: con SetWidth el FontString corta la linea sola y
-        -- un encantamiento largo aparecia partido en dos, como si fueran dos.
-        -- Auto-ancho: cada linea se dibuja entera y el CENTER la alinea igual.
+
         icon.enchantText:SetWidth(0)
         icon.enchantText:SetPoint("BOTTOM", icon, "TOP", 0, 2)
     end
@@ -578,7 +487,7 @@ for slot, icon in pairs(slots) do
     if not icon.poisonText then
         icon.poisonText = icon:CreateFontString(nil, "OVERLAY")
         icon.poisonText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
-        icon.poisonText:SetTextColor(0.0, 1.0, 0.27, 1)  -- green
+        icon.poisonText:SetTextColor(0.0, 1.0, 0.27, 1)
         icon.poisonText:SetJustifyH("CENTER")
         icon.poisonText:SetWidth(0)
         icon.poisonText:SetPoint("BOTTOM", icon.enchantText, "TOP", 0, 2)
@@ -590,14 +499,12 @@ for slot, icon in pairs(slots) do
         icon.gemText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
         icon.gemText:SetTextColor(1.0, 1.0, 1.0, 1)
         icon.gemText:SetJustifyH("CENTER")
-        -- Idem: una gema como "+10 penetracion de armadura y +15 aguante" no
-        -- entraba en 150 px y se leia como dos gemas distintas.
+
         icon.gemText:SetWidth(0)
         icon.gemText:SetPoint("BOTTOM", icon.poisonText, "TOP", 0, 2)
         icon.gemText:Hide()
     end
 
-    -- Horizontal combined text (to the right)
     if not icon.horizontalText then
         icon.horizontalText = icon:CreateFontString(nil, "OVERLAY")
         icon.horizontalText:SetFont("Fonts\\FRIZQT__.TTF", ns.db and ns.db.textSize or config.textSize, "OUTLINE")
@@ -615,9 +522,6 @@ for slot, icon in pairs(slots) do
     icon:SetScript("OnLeave", GameTooltip_Hide)
 end
 
--- ============================================================
--- Border helper
--- ============================================================
 local function SetBorderVisibility(icon, visible, rarity)
     if visible and rarity and rarity > 1 then
         local r, g, b = GetItemQualityColor(rarity)
@@ -628,9 +532,6 @@ local function SetBorderVisibility(icon, visible, rarity)
     end
 end
 
--- ============================================================
--- Slot label fallback
--- ============================================================
 local _, playerClass = UnitClass("player")
 
 local function GetSlotLabel(slot)
@@ -646,9 +547,6 @@ local function GetSlotLabel(slot)
     return ""
 end
 
--- ============================================================
--- UpdateWeaponSlot
--- ============================================================
 local function UpdateWeaponSlot(slot)
     local icon = slots[slot]
     if not icon then return end
@@ -687,23 +585,21 @@ local function UpdateWeaponSlot(slot)
 
     SetBorderVisibility(icon, ns.db.showClassBorders, rarity)
 
-    -- Gather info
     local enchantText, gemText, poisonText
     local isHorizontal = ns.db.horizontalText
     local itemID = GetInventoryItemID("player", slot)
 
-    -- Special: Paladin libram/shield with resilience (known PvP librams)
     if slot == 17 and playerClass == "PALADIN"
        and (itemID == 51533 or itemID == 42561) then
         enchantText = "RESIL"
         gemText = nil
     else
-        -- Single tooltip pass: get both enchant and gems at once
+
         local scanEnch, scanGems, scanPoison, scanPoisonPat = ScanSlotTooltip(slot)
         if ns.db.showEnchants then enchantText = scanEnch end
         if ns.db.showGems     then gemText     = scanGems end
         if ns.db.showPoison and scanPoison then poisonText = scanPoison end
-        -- Swap weapon icon to poison icon (found in bags)
+
         if ns.db.showPoisonIcon and scanPoisonPat then
             local poisonIcon = GetPoisonIconFromBags(scanPoisonPat)
             if poisonIcon then
@@ -712,10 +608,9 @@ local function UpdateWeaponSlot(slot)
         end
     end
 
-    -- ---- Render text ----
-    local GOLD  = "|cFFFFD100"  -- enchant color
-    local WHITE = "|cFFFFFFFF"  -- gem color
-    local GREEN = "|cFF00FF44"  -- poison color
+    local GOLD  = "|cFFFFD100"
+    local WHITE = "|cFFFFFFFF"
+    local GREEN = "|cFF00FF44"
     local RESET = "|r"
 
     if isHorizontal then
@@ -745,7 +640,7 @@ local function UpdateWeaponSlot(slot)
         icon.gemText:Hide()
         icon.poisonText:Hide()
     else
-        -- Vertical mode (colors set on FontString directly)
+
         icon.horizontalText:Hide()
 
         if gemText and gemText ~= "" then
@@ -755,7 +650,6 @@ local function UpdateWeaponSlot(slot)
             icon.gemText:Hide()
         end
 
-        -- Enchant (gold, just above icon)
         if enchantText and enchantText ~= "" then
             icon.enchantText:SetTextColor(1.0, 0.82, 0.0, 1)
             icon.enchantText:SetText(enchantText)
@@ -770,7 +664,6 @@ local function UpdateWeaponSlot(slot)
             end
         end
 
-        -- Poison (green, above enchant)
         if poisonText and poisonText ~= "" then
             icon.poisonText:SetText(poisonText)
             icon.poisonText:Show()
@@ -779,8 +672,6 @@ local function UpdateWeaponSlot(slot)
             icon.poisonText:Hide()
         end
 
-        -- Gems (white, above poison)
-        -- Reanchor gemText above poisonText if poison visible, else above enchantText
         icon.gemText:ClearAllPoints()
         if poisonText and poisonText ~= "" then
             icon.gemText:SetPoint("BOTTOM", icon.poisonText, "TOP", 0, 2)
@@ -790,9 +681,6 @@ local function UpdateWeaponSlot(slot)
     end
 end
 
--- ============================================================
--- UpdateIconPositions
--- ============================================================
 local function UpdateIconPositions()
     if not slots[16] or not slots[17] or not slots[18] then return end
 
@@ -834,12 +722,10 @@ local function UpdateIconPositions()
         end
     end
 
-    -- Refresh content
     if ns.db.showSlot16 then UpdateWeaponSlot(16) end
     if ns.db.showSlot17 then UpdateWeaponSlot(17) end
     if ns.db.showSlot18 then UpdateWeaponSlot(18) end
 
-    -- Fix #8: Resize parent frame to fit visible children (drag zone match)
     local n = #visibleSlots
     local iSize = config.iconSize
     local gap   = ns.db.iconSpacing * 5
@@ -850,9 +736,6 @@ local function UpdateIconPositions()
     end
 end
 
--- ============================================================
--- UpdateAllWeapons / UpdateTextSize
--- ============================================================
 local function UpdateAllWeapons()
     for slot in pairs(slots) do
         UpdateWeaponSlot(slot)
@@ -869,9 +752,6 @@ local function UpdateTextSize()
     end
 end
 
--- ============================================================
--- Expose globals for Options panel
--- ============================================================
 _G.UpdateAllWeapons                  = UpdateAllWeapons
 _G.EquippedWeapons_UpdateAllWeapons  = UpdateAllWeapons
 _G.UpdateIconPositions               = UpdateIconPositions
@@ -879,9 +759,6 @@ _G.EquippedWeapons_UpdateIconPositions = UpdateIconPositions
 _G.UpdateTextSize                    = UpdateTextSize
 _G.SetLocked                         = SetLocked
 
--- ============================================================
--- Events
--- ============================================================
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -890,7 +767,7 @@ frame:RegisterEvent("UNIT_AURA")
 
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "EquippedWeapons" then
-        -- Initialize profile system (global vs per-character)
+
         ns.InitProfiles()
 
         if not ns.db.classDefaultsApplied then
@@ -931,13 +808,13 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         SetLocked(ns.db.locked)
         UpdateTextSize()
         UpdateIconPositions()
-        -- Delay first full update so item cache is warm
+
         RunAfterDelay("init", 0.3, UpdateAllWeapons)
         return
     end
 
     if event == "PLAYER_ENTERING_WORLD" then
-        -- Longer delay on world enter for cache
+
         RunAfterDelay("world", 0.5, function()
             UpdateAllWeapons()
             UpdateIconPositions()
@@ -952,7 +829,6 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         end)
     end
 
-    -- Real-time poison update when bags change or auras change
     if event == "BAG_UPDATE" then
         RunAfterDelay("refresh", 0.3, UpdateAllWeapons)
     end
@@ -962,9 +838,6 @@ frame:SetScript("OnEvent", function(self, event, arg1)
     end
 end)
 
--- ============================================================
--- Slash commands
--- ============================================================
 SLASH_EQUIPPEDWEAPONS1 = "/equippedweapons"
 SLASH_EQUIPPEDWEAPONS2 = "/ew"
 
@@ -978,7 +851,7 @@ SlashCmdList["EQUIPPEDWEAPONS"] = function(msg)
 
     if msg == "reset" then
         for k, v in pairs(DB_DEFAULTS) do ns.db[k] = v end
-        ns.db.classDefaultsApplied = nil   -- allow class defaults on next reload
+        ns.db.classDefaultsApplied = nil
         local _, pClass = UnitClass("player")
         if pClass == "HUNTER" then
             ns.SetCharProfile(true)

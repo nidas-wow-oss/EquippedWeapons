@@ -23,16 +23,16 @@ ns.Len = {
     ["Frame locked."]               = "Frame locked.",
     ["Frame unlocked. (Shift+Alt+click to move)"] = "Frame unlocked (Shift+Alt+click to move).",
     ["Configure how EquippedWeapons displays weapon icons, enchants, and gems."] = "Configure how EquippedWeapons displays weapon icons, enchants, and gems.",
-    -- Layout & Text
+
     ["Show text horizontally"]      = "Show text horizontally",
     ["Vertical icon layout"]        = "Vertical icon layout",
     ["Grow upwards"]                = "Grow upwards",
     ["Abbreviate text (short mode)"] = "Abbreviate text (short mode)",
-    -- Weapon slots
+
     ["Main Hand"]                   = "Main Hand",
     ["Off Hand"]                    = "Off Hand",
     ["Ranged / Relic"]              = "Ranged / Relic",
-    -- Profile & Text size
+
     ["Per-character settings"]      = "Per-character settings",
     ["Hide slot labels"]            = "Hide slot labels",
     ["Show full poison name"]       = "Show full poison name",

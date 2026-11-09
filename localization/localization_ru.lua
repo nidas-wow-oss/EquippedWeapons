@@ -23,16 +23,16 @@ ns.Lru = {
     ["Frame locked."]               = "Окно закреплено.",
     ["Frame unlocked. (Shift+Alt+click to move)"] = "Окно откреплено (Shift+Alt+клик для перемещения).",
     ["Configure how EquippedWeapons displays weapon icons, enchants, and gems."] = "Настройка отображения значков оружия, чар и камней в EquippedWeapons.",
-    -- Layout & Text
+
     ["Show text horizontally"]      = "Показывать текст горизонтально",
     ["Vertical icon layout"]        = "Вертикальное расположение иконок",
     ["Grow upwards"]                = "Расширять вверх",
     ["Abbreviate text (short mode)"] = "Сокращать текст (краткий режим)",
-    -- Weapon slots
+
     ["Main Hand"]                   = "Основная рука",
     ["Off Hand"]                    = "Вторая рука",
     ["Ranged / Relic"]              = "Дальний бой / Реликвия",
-    -- Profile & Text size
+
     ["Per-character settings"]      = "Настройки персонажа",
     ["Hide slot labels"]            = "Скрыть метки слотов",
     ["Show full poison name"]       = "Показать полное название яда",

@@ -23,16 +23,16 @@ ns.Les = {
     ["Frame locked."]               = "Marco bloqueado.",
     ["Frame unlocked. (Shift+Alt+click to move)"] = "Marco desbloqueado (Shift+Alt+clic para mover).",
     ["Configure how EquippedWeapons displays weapon icons, enchants, and gems."] = "Configura cómo EquippedWeapons muestra iconos, encantamientos y gemas.",
-    -- Layout & Text
+
     ["Show text horizontally"]      = "Mostrar texto horizontal",
     ["Vertical icon layout"]        = "Iconos en vertical",
     ["Grow upwards"]                = "Crecer hacia arriba",
     ["Abbreviate text (short mode)"] = "Abreviar texto (modo corto)",
-    -- Weapon slots
+
     ["Main Hand"]                   = "Mano principal",
     ["Off Hand"]                    = "Mano secundaria",
     ["Ranged / Relic"]              = "A distancia / Reliquia",
-    -- Profile & Text size
+
     ["Per-character settings"]      = "Ajustes por personaje",
     ["Hide slot labels"]            = "Ocultar etiquetas de ranura",
     ["Show full poison name"]       = "Mostrar nombre completo del veneno",

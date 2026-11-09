@@ -14,7 +14,6 @@ else
     ns.L = ns.Len or {}
 end
 
--- fallback: devuelve la clave si falta traducción
 setmetatable(ns.L, {
     __index = function(t, k) return k end
 })

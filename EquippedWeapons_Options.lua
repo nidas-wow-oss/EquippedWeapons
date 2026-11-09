@@ -1,4 +1,3 @@
--- EquippedWeapons_Options.lua  v2.0
 local _, ns = ...
 if not ns.L then
     ns.L = setmetatable({}, { __index = function(_, k) return k end })
@@ -49,9 +48,6 @@ local function Slider(name, parent, x, y, labelKey, initVal, minV, maxV, step, w
     return sl
 end
 
--- ============================================================
--- Panel
--- ============================================================
 local panel = CreateFrame("Frame", "EquippedWeaponsOptionsPanel")
 panel.name = "EquippedWeapons"
 
@@ -87,16 +83,10 @@ subFS:SetPoint("LEFT", titleFS, "RIGHT", 8, 0)
 subFS:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
 subFS:SetText(C_GRAY .. "v2.0   Shift+Alt+Drag  |  /ew" .. C_RESET)
 
--- ============================================================
--- Layout: two clean columns, same depth for both
--- C1 = left, C2 = right
--- R0 = first content row
--- ============================================================
 local C1 = 8
 local C2 = 252
 local R0 = -56
 
--- ── LEFT COLUMN ──────────────────────────────────────────────
 Header(panel, C1, R0, "Display")
 
 local chkEnchants = Checkbox("EWOptEnchants", panel, C1, R0 - 20,
@@ -123,7 +113,6 @@ local chkHideLabels = Checkbox("EWOptHideLabels", panel, C1, R0 - 98,
         if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
     end)
 
--- gap before Layout section
 Header(panel, C1, R0 - 128, "Layout & Text")
 
 local chkHorizontal = Checkbox("EWOptHorizontal", panel, C1, R0 - 148,
@@ -156,21 +145,17 @@ local chkAbbreviate = Checkbox("EWOptAbbreviate", panel, C1, R0 - 226,
         if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
     end)
 
--- Lock frame: styled red box instead of Position header
--- Lock frame: manual border (WotLK Button doesn't support SetBackdrop)
 local lockBox = CreateFrame("Frame", "EWLockBox", panel)
 lockBox:SetPoint("TOPLEFT", panel, "TOPLEFT", C1 + 6, R0 - 258)
 lockBox:SetSize(174, 32)
 lockBox:SetFrameLevel(panel:GetFrameLevel() + 3)
 lockBox:EnableMouse(true)
 
--- Background
 local lbBg = lockBox:CreateTexture(nil, "ARTWORK")
 lbBg:SetTexture("Interface\\Buttons\\WHITE8X8")
 lbBg:SetAllPoints(lockBox)
 lbBg:SetVertexColor(0.03, 0.08, 0.20, 0.95)
 
--- Border edges (4 textures)
 local BW = 1
 local function LBEdge(layer)
     local t = lockBox:CreateTexture(nil, layer or "OVERLAY")
@@ -220,7 +205,6 @@ lockBox:SetScript("OnLeave", function() UpdateLockBoxVisual() end)
 
 local chkLock = { SetChecked = function(self, val) UpdateLockBoxVisual() end }
 
--- ── RIGHT COLUMN ─────────────────────────────────────────────
 Header(panel, C2 - 2, R0, "Weapon Slots")
 
 local chkSlot16 = Checkbox("EWOptSlot16", panel, C2 - 2, R0 - 20,
@@ -255,11 +239,9 @@ local chkCharProfile = Checkbox("EWOptCharProfile", panel, C2 - 2, R0 - 122,
         if _G.UpdateIconPositions then _G.UpdateIconPositions() end
         if EquippedWeaponsFrame   then EquippedWeaponsFrame:SetScale(ns.db.scale or 1) end
         panel.refresh()
-        -- silent
+
     end)
 
--- ── ROGUE OPTIONS (right column, below Profile) ───────────────
--- These frames are created at fixed positions but shown/hidden in refresh()
 local rogueHeader   = Header(panel, C2 - 2, R0 - 152, "Rogue Options")
 
 local chkShowPoison = Checkbox("EWOptShowPoison", panel, C2 - 2, R0 - 172,
@@ -280,11 +262,8 @@ local chkPoisonIcon = Checkbox("EWOptPoisonIcon", panel, C2 - 2, R0 - 224,
         if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
     end)
 
--- ── SLIDERS ────────────────────────────────────────────────────
 local SW = 180
 
--- Row 1: Scale (left) | Icon spacing (right, shifted left)
--- Icon spacing: right column, higher up
 local SY_SP   = R0 - 278
 local slSpacing = Slider("EWOptSpacing", panel, 212, SY_SP,
     "Icon spacing", "5", 0, 20, 1, SW,
@@ -295,7 +274,6 @@ local slSpacing = Slider("EWOptSpacing", panel, 212, SY_SP,
         if _G.UpdateIconPositions then _G.UpdateIconPositions() end
     end)
 
--- Scale (left) and Text size (right) on same row, below icon spacing
 local SY_MAIN = R0 - 328
 local slScale = Slider("EWOptScale", panel, C1 + 2, SY_MAIN,
     "Scale", "1.3", 0.5, 2.0, 0.1, SW,
@@ -316,9 +294,6 @@ local slTextSize = Slider("EWOptTextSize", panel, 212, SY_MAIN,
         if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
     end)
 
--- ============================================================
--- REFRESH / DEFAULTS
--- ============================================================
 panel.refresh = function()
     if not ns.db then return end
     chkEnchants:SetChecked(ns.db.showEnchants)
@@ -340,7 +315,7 @@ panel.refresh = function()
     SetSliderLbl(slScale,    "Scale",        string.format("%.1f", ns.db.scale or 1))
     SetSliderLbl(slSpacing,  "Icon spacing", ns.db.iconSpacing or 5)
     SetSliderLbl(slTextSize, "Text size",    ns.db.textSize or 9)
-    -- Rogue section: show only for Rogues
+
     local _, pClass = UnitClass("player")
     local isRogue = (pClass == "ROGUE")
     if isRogue then

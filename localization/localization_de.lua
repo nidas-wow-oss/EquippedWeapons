@@ -23,16 +23,16 @@ ns.Lde = {
     ["Frame locked."]               = "Fenster gesperrt.",
     ["Frame unlocked. (Shift+Alt+click to move)"] = "Fenster entsperrt (Shift+Alt+Klick zum Bewegen).",
     ["Configure how EquippedWeapons displays weapon icons, enchants, and gems."] = "Konfiguriere, wie EquippedWeapons Waffensymbole, Verzauberungen und Edelsteine anzeigt.",
-    -- Layout & Text
+
     ["Show text horizontally"]      = "Text horizontal anzeigen",
     ["Vertical icon layout"]        = "Symbole vertikal anordnen",
     ["Grow upwards"]                = "Nach oben wachsen",
     ["Abbreviate text (short mode)"] = "Text abkürzen (Kurzformat)",
-    -- Weapon slots
+
     ["Main Hand"]                   = "Haupthand",
     ["Off Hand"]                    = "Nebenhand",
     ["Ranged / Relic"]              = "Fernkampf / Relikt",
-    -- Profile & Text size
+
     ["Per-character settings"]      = "Charakterspezifische Einstellungen",
     ["Hide slot labels"]            = "Slot-Bezeichnungen ausblenden",
     ["Show full poison name"]       = "Vollständigen Giftnamen anzeigen",
