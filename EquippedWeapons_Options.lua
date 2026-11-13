@@ -92,25 +92,25 @@ Header(panel, C1, R0, "Display")
 local chkEnchants = Checkbox("EWOptEnchants", panel, C1, R0 - 20,
     L["Show enchants text"], function(self)
         ns.db.showEnchants = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local chkGems = Checkbox("EWOptGems", panel, C1, R0 - 46,
     L["Show gems text"], function(self)
         ns.db.showGems = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local chkBorders = Checkbox("EWOptBorders", panel, C1, R0 - 72,
     L["Show quality borders"], function(self)
         ns.db.showClassBorders = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local chkHideLabels = Checkbox("EWOptHideLabels", panel, C1, R0 - 98,
     L["Hide slot labels"], function(self)
         ns.db.hideSlotLabels = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 Header(panel, C1, R0 - 128, "Layout & Text")
@@ -118,7 +118,7 @@ Header(panel, C1, R0 - 128, "Layout & Text")
 local chkHorizontal = Checkbox("EWOptHorizontal", panel, C1, R0 - 148,
     L["Show text horizontally"], function(self)
         ns.db.horizontalText = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local chkVertical = Checkbox("EWOptVertical", panel, C1, R0 - 174,
@@ -128,21 +128,21 @@ local chkVertical = Checkbox("EWOptVertical", panel, C1, R0 - 174,
             ns.db.horizontalText = true
             chkHorizontal:SetChecked(true)
         end
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
-        if _G.UpdateAllWeapons    then _G.UpdateAllWeapons()    end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
+        if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
     end)
 
 local chkDirection = Checkbox("EWOptDirection", panel, C1, R0 - 200,
     L["Grow upwards"], function(self)
         ns.db.layoutDirection = self:GetChecked() and "up" or "down"
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
-        if _G.UpdateAllWeapons    then _G.UpdateAllWeapons()    end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
+        if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
     end)
 
 local chkAbbreviate = Checkbox("EWOptAbbreviate", panel, C1, R0 - 226,
     L["Abbreviate text (short mode)"], function(self)
         ns.db.abbreviateText = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local lockBox = CreateFrame("Frame", "EWLockBox", panel)
@@ -192,7 +192,7 @@ UpdateLockBoxVisual()
 
 lockBox:SetScript("OnMouseUp", function()
     local newState = not ns.db.locked
-    if _G.SetLocked then _G.SetLocked(newState) end
+    if ns.SetLocked then ns.SetLocked(newState) end
     UpdateLockBoxVisual()
 end)
 lockBox:SetScript("OnEnter", function()
@@ -210,22 +210,22 @@ Header(panel, C2 - 2, R0, "Weapon Slots")
 local chkSlot16 = Checkbox("EWOptSlot16", panel, C2 - 2, R0 - 20,
     L["Main Hand"], function(self)
         ns.db.showSlot16 = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons    then _G.UpdateAllWeapons()    end
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
+        if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
     end)
 
 local chkSlot17 = Checkbox("EWOptSlot17", panel, C2 - 2, R0 - 46,
     L["Off Hand"], function(self)
         ns.db.showSlot17 = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons    then _G.UpdateAllWeapons()    end
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
+        if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
     end)
 
 local chkSlot18 = Checkbox("EWOptSlot18", panel, C2 - 2, R0 - 72,
     L["Ranged / Relic"], function(self)
         ns.db.showSlot18 = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons    then _G.UpdateAllWeapons()    end
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
+        if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
     end)
 
 Header(panel, C2 - 2, R0 - 102, "Profile")
@@ -234,9 +234,9 @@ local chkCharProfile = Checkbox("EWOptCharProfile", panel, C2 - 2, R0 - 122,
     L["Per-character settings"], function(self)
         local enable = self:GetChecked() and true or false
         ns.SetCharProfile(enable)
-        if _G.UpdateTextSize      then _G.UpdateTextSize()      end
-        if _G.UpdateAllWeapons    then _G.UpdateAllWeapons()    end
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
+        if ns.UpdateTextSize      then ns.UpdateTextSize()      end
+        if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
         if EquippedWeaponsFrame   then EquippedWeaponsFrame:SetScale(ns.db.scale or 1) end
         panel.refresh()
 
@@ -247,19 +247,19 @@ local rogueHeader   = Header(panel, C2 - 2, R0 - 152, "Rogue Options")
 local chkShowPoison = Checkbox("EWOptShowPoison", panel, C2 - 2, R0 - 172,
     L["Show poison text"], function(self)
         ns.db.showPoison = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local chkFullPoison = Checkbox("EWOptFullPoison", panel, C2 - 2, R0 - 198,
     L["Show full poison name"], function(self)
         ns.db.showFullPoisonName = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local chkPoisonIcon = Checkbox("EWOptPoisonIcon", panel, C2 - 2, R0 - 224,
     L["Show poison icon"], function(self)
         ns.db.showPoisonIcon = self:GetChecked() and true or false
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 local SW = 180
@@ -271,7 +271,7 @@ local slSpacing = Slider("EWOptSpacing", panel, 212, SY_SP,
         v = math.floor(v + 0.5)
         ns.db.iconSpacing = v
         SetSliderLbl(self, "Icon spacing", v)
-        if _G.UpdateIconPositions then _G.UpdateIconPositions() end
+        if ns.UpdateIconPositions then ns.UpdateIconPositions() end
     end)
 
 local SY_MAIN = R0 - 328
@@ -290,8 +290,8 @@ local slTextSize = Slider("EWOptTextSize", panel, 212, SY_MAIN,
         v = math.floor(v + 0.5)
         ns.db.textSize = v
         SetSliderLbl(self, "Text size", v)
-        if _G.UpdateTextSize   then _G.UpdateTextSize()   end
-        if _G.UpdateAllWeapons then _G.UpdateAllWeapons() end
+        if ns.UpdateTextSize   then ns.UpdateTextSize()   end
+        if ns.UpdateAllWeapons then ns.UpdateAllWeapons() end
     end)
 
 panel.refresh = function()
@@ -351,6 +351,12 @@ panel.default = function()
     ns.db.showFullPoisonName = false
     ns.db.showPoisonIcon     = false
     panel.refresh()
+
+    if ns.SetLocked           then ns.SetLocked(false)       end
+    if ns.UpdateTextSize      then ns.UpdateTextSize()      end
+    if ns.UpdateIconPositions then ns.UpdateIconPositions() end
+    if ns.UpdateAllWeapons    then ns.UpdateAllWeapons()    end
+    if EquippedWeaponsFrame   then EquippedWeaponsFrame:SetScale(ns.db.scale) end
 end
 
 InterfaceOptions_AddCategory(panel)

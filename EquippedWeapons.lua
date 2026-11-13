@@ -752,18 +752,41 @@ local function UpdateTextSize()
     end
 end
 
-_G.UpdateAllWeapons                  = UpdateAllWeapons
-_G.EquippedWeapons_UpdateAllWeapons  = UpdateAllWeapons
-_G.UpdateIconPositions               = UpdateIconPositions
+local function UpdateVisibility()
+    if frame:GetParent() ~= UIParent then
+        frame:SetParent(UIParent)
+    end
+    local inVehicle = UnitHasVehicleUI("player")
+        or (UnitInVehicle and UnitInVehicle("player"))
+    if inVehicle or not UIParent:IsShown() then
+        frame:Hide()
+    else
+        frame:Show()
+    end
+end
+
+UIParent:HookScript("OnShow", UpdateVisibility)
+UIParent:HookScript("OnHide", UpdateVisibility)
+
+ns.UpdateAllWeapons    = UpdateAllWeapons
+ns.UpdateIconPositions = UpdateIconPositions
+ns.UpdateTextSize      = UpdateTextSize
+ns.SetLocked           = SetLocked
+_G.EquippedWeapons_UpdateAllWeapons    = UpdateAllWeapons
 _G.EquippedWeapons_UpdateIconPositions = UpdateIconPositions
-_G.UpdateTextSize                    = UpdateTextSize
-_G.SetLocked                         = SetLocked
 
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 frame:RegisterEvent("BAG_UPDATE")
-frame:RegisterEvent("UNIT_AURA")
+
+frame:RegisterEvent("UNIT_INVENTORY_CHANGED")
+frame:RegisterEvent("UNIT_ENTERED_VEHICLE")
+frame:RegisterEvent("UNIT_EXITED_VEHICLE")
+
+if playerClass == "ROGUE" then
+    frame:RegisterEvent("UNIT_AURA")
+end
 
 frame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "EquippedWeapons" then
@@ -808,12 +831,31 @@ frame:SetScript("OnEvent", function(self, event, arg1)
         SetLocked(ns.db.locked)
         UpdateTextSize()
         UpdateIconPositions()
+        UpdateVisibility()
 
         RunAfterDelay("init", 0.3, UpdateAllWeapons)
         return
     end
 
+    if event == "UNIT_ENTERED_VEHICLE" or event == "UNIT_EXITED_VEHICLE" then
+        if arg1 == "player" then
+            UpdateVisibility()
+
+            RunAfterDelay("vehicle", 0.2, UpdateVisibility)
+        end
+        return
+    end
+
+    if event == "UNIT_INVENTORY_CHANGED" then
+        if arg1 == "player" then
+            RunAfterDelay("refresh", 0.2, UpdateAllWeapons)
+        end
+        return
+    end
+
     if event == "PLAYER_ENTERING_WORLD" then
+
+        UpdateVisibility()
 
         RunAfterDelay("world", 0.5, function()
             UpdateAllWeapons()
